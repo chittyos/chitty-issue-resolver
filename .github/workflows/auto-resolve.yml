@@ -38,7 +38,8 @@ jobs:
 
       - name: Scan issues (report)
         env:
-          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "## Issue Scan Report" >> $GITHUB_STEP_SUMMARY
           node src/cli.js scan --json > scan-results.json
@@ -57,7 +58,8 @@ jobs:
       - name: Resolve issues
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           ORG_FLAG=""
           if [ -n "${{ github.event.inputs.organization }}" ]; then
