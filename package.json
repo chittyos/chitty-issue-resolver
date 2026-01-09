@@ -1,0 +1,23 @@
+{
+  "name": "chitty-issue-resolver",
+  "version": "1.0.0",
+  "description": "Automated issue resolution for ChitCommit organizations",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "resolve-issues": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "scan": "node src/cli.js scan",
+    "resolve": "node src/cli.js resolve",
+    "report": "node src/cli.js report"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0"
+  },
+  "author": "ChitCommit",
+  "license": "MIT"
+}

@@ -1,0 +1,73 @@
+name: Auto Issue Resolution
+
+on:
+  schedule:
+    # Run every hour
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (preview only)'
+        required: false
+        default: 'false'
+        type: boolean
+      organization:
+        description: 'Specific organization to process (leave empty for all)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  resolve-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Scan issues (report)
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN }}
+        run: |
+          echo "## Issue Scan Report" >> $GITHUB_STEP_SUMMARY
+          node src/cli.js scan --json > scan-results.json
+          node -e "
+            const results = require('./scan-results.json');
+            const stats = results.stats;
+            console.log('| Metric | Count |');
+            console.log('|--------|-------|');
+            console.log('| Scanned | ' + stats.scanned + ' |');
+            console.log('| Stale | ' + stats.stale + ' |');
+            console.log('| Bot Issues | ' + stats.botCleanup + ' |');
+            console.log('| Resolved | ' + stats.resolved + ' |');
+            console.log('| Protected | ' + stats.protected + ' |');
+          " >> $GITHUB_STEP_SUMMARY
+
+      - name: Resolve issues
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHITTY_ORG_TOKEN }}
+        run: |
+          ORG_FLAG=""
+          if [ -n "${{ github.event.inputs.organization }}" ]; then
+            ORG_FLAG="--org ${{ github.event.inputs.organization }}"
+          fi
+          node src/cli.js resolve $ORG_FLAG
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-results
+          path: scan-results.json
+          retention-days: 30

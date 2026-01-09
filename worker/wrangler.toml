@@ -1,0 +1,14 @@
+name = "chitty-issue-resolver"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[triggers]
+# Run every 15 minutes
+crons = ["*/15 * * * *"]
+
+[vars]
+ORGS = "chittyos,chittyapps,chittyfoundation,chittycorp"
+STALE_DAYS = "90"
+
+# GitHub token stored as secret
+# wrangler secret put GITHUB_TOKEN
