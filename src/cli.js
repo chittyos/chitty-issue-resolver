@@ -26,7 +26,9 @@ program
     const resolver = new IssueResolver(token);
     const orgs = options.org ? [options.org] : ORGANIZATIONS;
 
-    console.log(chalk.blue(`Scanning ${orgs.length} organization(s)...`));
+    if (!options.json) {
+      console.log(chalk.blue(`Scanning ${orgs.length} organization(s)...`));
+    }
 
     const results = await resolver.scanAllOrganizations(orgs, true);
     const stats = resolver.getStats();
